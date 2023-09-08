@@ -3,7 +3,14 @@ import joblib
 import soundfile
 import numpy as np
 import librosa
-from flask import Flask, render_template, request, redirect, url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    send_from_directory,
+)
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -52,6 +59,7 @@ def index():
 @app.route("/upload", methods=["GET", "POST"])
 def upload_file():
     message = ""
+    uploaded_file_path = None
     if request.method == "POST":
         # Check if a file is included in the POST request
         if "file" not in request.files:
@@ -68,13 +76,20 @@ def upload_file():
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
             file.save(filepath)
-
             # Extract features and predict emotion
             feature = extract_feature(filepath, mfcc=True, chroma=True, mel=True)
             emotion = model.predict([feature])[0]
-            message = f'File has been uploaded and predicted emotion is: {emotion}'
+            message = f'File uploaded and processed successfully!'
+            uploaded_file_path = url_for("uploaded_file", filename=filename)
 
-    return render_template("upload.html", message=message)
+    return render_template(
+        "upload.html", emotion=emotion,message=message, uploaded_file_path=uploaded_file_path
+    )
+
+
+@app.route("/uploads/<filename>")
+def uploaded_file(filename):
+    return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
 
 
 if __name__ == "__main__":

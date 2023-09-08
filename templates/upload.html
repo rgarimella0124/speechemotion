@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Speech Emtion Classifier</title>
+    <title>Speech Emotion Classifier</title>
     <link
       rel="stylesheet"
       href="{{ url_for('static', filename='style.css') }}"
@@ -34,6 +34,19 @@
       <p>{{ message }}</p>
       {% endif %}
     </form>
+
+    <!-- Audio player -->
+    {% if uploaded_file_path %}
+    <audio controls>
+      <source src="{{ uploaded_file_path }}" type="audio/wav" />
+      Your browser does not support the audio element.
+    </audio>
+    {% endif %}
+
+    <!-- Display the message here -->
+    {% if emotion %}
+    <p>The Predicted Emotion for the given audio is {{ emotion }}</p>
+    {% endif %}
 
     <script>
       document
