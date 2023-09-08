@@ -1,4 +1,8 @@
 import os
+import joblib
+import soundfile
+import numpy as np
+import librosa
 from flask import Flask, render_template, request, redirect, url_for
 from werkzeug.utils import secure_filename
 
@@ -6,13 +10,38 @@ app = Flask(__name__)
 app.config["UPLOAD_FOLDER"] = "uploads"
 app.config["ALLOWED_EXTENSIONS"] = {"wav"}
 
+# Load model and data once, to save processing time.
+model = joblib.load("model.pkl")
 
-# Define a function to check if a file has an allowed extension
+
 def allowed_file(filename):
     return (
         "." in filename
         and filename.rsplit(".", 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
     )
+
+
+def extract_feature(file_name, mfcc, chroma, mel):
+    with soundfile.SoundFile(file_name) as sound_file:
+        X = sound_file.read(dtype="float32")
+        sample_rate = sound_file.samplerate
+        if chroma:
+            stft = np.abs(librosa.stft(X))
+        result = np.array([])
+        if mfcc:
+            mfccs = np.mean(
+                librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40).T, axis=0
+            )
+            result = np.hstack((result, mfccs))
+        if chroma:
+            chroma = np.mean(
+                librosa.feature.chroma_stft(S=stft, sr=sample_rate).T, axis=0
+            )
+            result = np.hstack((result, chroma))
+        if mel:
+            mel = np.mean(librosa.feature.melspectrogram(y=X, sr=sample_rate).T, axis=0)
+            result = np.hstack((result, mel))
+    return result
 
 
 @app.route("/")
@@ -37,8 +66,13 @@ def upload_file():
         # Check if the file has an allowed extension
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
-            message = f'File "{filename}" uploaded and processed successfully!'
+            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+            file.save(filepath)
+
+            # Extract features and predict emotion
+            feature = extract_feature(filepath, mfcc=True, chroma=True, mel=True)
+            emotion = model.predict([feature])[0]
+            message = f'File has been uploaded and predicted emotion is: {emotion}'
 
     return render_template("upload.html", message=message)
 
