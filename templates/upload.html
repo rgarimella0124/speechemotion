@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Speech Emtion Classifier</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+  </head>
+  <body>
+    <h1>Upload a sound File (WAV)</h1>
+    <form
+      action="/upload"
+      method="POST"
+      enctype="multipart/form-data"
+      id="upload-form"
+    >
+      <input
+        type="file"
+        name="file"
+        id="file-input"
+        accept=".wav"
+        style="display: none"
+        required
+      />
+
+      <label for="file-input" id="file-label">Choose a file</label>
+      <button type="submit">Upload</button>
+
+      <!-- Display the message here -->
+      {% if message %}
+      <p>{{ message }}</p>
+      {% endif %}
+    </form>
+
+    <script>
+      document
+        .getElementById("file-input")
+        .addEventListener("change", function () {
+          var fileLabel = document.getElementById("file-label");
+          if (this.files && this.files.length > 0) {
+            fileLabel.innerHTML = this.files[0].name;
+          } else {
+            fileLabel.innerHTML = "Choose a file";
+          }
+        });
+    </script>
+  </body>
+</html>
