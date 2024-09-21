@@ -85,16 +85,24 @@
         font-size: 1.5rem;
         font-weight: 700;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
         padding: 1rem;
         border-radius: 12px;
         transition: background-color 0.3s ease;
+        text-align: center;
       }
 
       .emotion-icon {
         font-size: 3rem;
-        margin-right: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .result-text {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
 
       .emotion-calm { color: #4CAF50; }
@@ -295,7 +303,10 @@
                 const resultElement = document.querySelector(".result");
                 resultElement.innerHTML = `
                   <i class="fas ${emotionIcons[data.emotion] || 'fa-meh'} emotion-icon emotion-${data.emotion}"></i>
-                  <span>The Predicted Emotion for the given audio is <span class="font-bold">${data.emotion}</span></span>
+                  <div class="result-text">
+                    <span>The Predicted Emotion for the</span>
+                    <span>given audio is <span class="font-bold">${data.emotion}</span></span>
+                  </div>
                 `;
                 resultElement.className = `result result-${data.emotion}`;
               }
