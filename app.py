@@ -3,7 +3,7 @@ import pickle
 import soundfile
 import numpy as np
 import librosa
-from flask import Flask, render_template, request, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
 from werkzeug.utils import secure_filename
 import logging
 import traceback
@@ -85,11 +85,11 @@ def upload_file():
         logging.info("Received POST request for file upload")
         if "file" not in request.files:
             logging.warning("No file part in the request")
-            return render_template("upload.html", error="No file part in the request. Please upload a file.")
+            return jsonify({"error": "No file part in the request. Please upload a file."})
         file = request.files["file"]
         if file.filename == "":
             logging.warning("No file selected")
-            return render_template("upload.html", error="No file selected. Please select a file.")
+            return jsonify({"error": "No file selected. Please select a file."})
         if file and allowed_file(file.filename):
             try:
                 filename = secure_filename(file.filename)
@@ -98,17 +98,21 @@ def upload_file():
                 file.save(filepath)
                 if model is None:
                     logging.error("Model not loaded")
-                    return render_template("upload.html", error="Model not loaded. Please check if 'emotion_model.pkl' exists and is valid.")
+                    return jsonify({"error": "Model not loaded. Please check if 'emotion_model.pkl' exists and is valid."})
                 emotion = predict_emotion(filepath)
                 logging.info(f"Emotion predicted: {emotion}")
-                return render_template("upload.html", emotion=emotion, message="File processed successfully!")
+                return jsonify({
+                    "message": "File processed successfully!",
+                    "emotion": emotion,
+                    "uploaded_file_path": url_for('uploaded_file', filename=filename)
+                })
             except Exception as e:
                 logging.error(f"Error processing file: {e}")
                 logging.error(traceback.format_exc())
-                return render_template("upload.html", error=f"An error occurred: {str(e)}")
+                return jsonify({"error": f"An error occurred: {str(e)}"})
         else:
             logging.warning("Invalid file type")
-            return render_template("upload.html", error="Invalid file type. Please upload a WAV file.")
+            return jsonify({"error": "Invalid file type. Please upload a WAV file."})
     return render_template("upload.html")
 
 @app.route("/uploads/<filename>")

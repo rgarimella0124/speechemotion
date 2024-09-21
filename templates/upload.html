@@ -182,7 +182,7 @@
           renderer: 'svg',
           loop: true,
           autoplay: false,
-          path: 'https://assets3.lottiefiles.com/packages/lf20_t9gkkhz4.json' // Replace with your desired Lottie animation JSON URL
+          path: 'https://assets3.lottiefiles.com/packages/lf20_t9gkkhz4.json'
         });
       });
 
@@ -217,19 +217,24 @@
             animation.stop();
             document.querySelector("#upload-section").classList.remove("hidden");
             document.querySelector(".result").classList.remove("hidden");
-            document.querySelector("#message").textContent = data.message;
 
-            if (data.uploaded_file_path) {
-              document.querySelector("#audio-source").src = data.uploaded_file_path;
-              document.querySelector(".audio-container").classList.remove("hidden");
-              document.querySelector("#audio-player").play();
-            }
-
-            if (data.emotion) {
+            if (data.error) {
               document.querySelector(".result").innerHTML = `
-                <i class="fas fa-chart-line"></i>
-                <span>The Predicted Emotion for the given audio is <span class="font-bold">${data.emotion}</span></span>
+                <i class="fas fa-exclamation-circle"></i>
+                <span>${data.error}</span>
               `;
+            } else {
+              if (data.uploaded_file_path) {
+                document.querySelector("#audio-source").src = data.uploaded_file_path;
+                document.querySelector(".audio-container").classList.remove("hidden");
+                document.querySelector("#audio-player").load(); // Load the new source
+              }
+
+              if (data.emotion) {
+                document.querySelector(".result").innerHTML = `
+                  <span>The Predicted Emotion for the given audio is <span class="font-bold">${data.emotion}</span></span>
+                `;
+              }
             }
           }, 8000);
         })
@@ -241,7 +246,10 @@
             animation.stop();
             document.querySelector("#upload-section").classList.remove("hidden");
             document.querySelector(".result").classList.remove("hidden");
-            document.querySelector("#message").textContent = "An error occurred. Please try again.";
+            document.querySelector(".result").innerHTML = `
+              <i class="fas fa-exclamation-circle"></i>
+              <span>An error occurred. Please try again.</span>
+            `;
           }, 8000);
         });
       });
