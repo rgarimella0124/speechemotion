@@ -4,3 +4,5 @@ data.pkl
 /testingfiles/
 /uploads/
 .vscode
+emotion_model.pkl
+Script.py
