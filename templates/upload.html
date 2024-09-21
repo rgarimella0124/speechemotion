@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Speech Emotion Recognition</title>
+    <title>Speech Emotion Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.16/tailwind.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,31 +12,22 @@
     <style>
       body {
         font-family: 'Inter', sans-serif;
-        background: linear-gradient(45deg, #002b5b, #0077b6, #00a8e8);
-        background-size: 400% 400%;
-        animation: soundwave-animation 20s ease infinite;
-      }
-
-      @keyframes soundwave-animation {
-        0% {
-          background-position: 0% 50%;
-        }
-        50% {
-          background-position: 100% 50%;
-        }
-        100% {
-          background-position: 0% 50%;
-        }
+        background: linear-gradient(to bottom, #001f3f, #003366, #004080);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
       }
 
       .container {
         max-width: 800px;
         margin: 0 auto;
         padding: 4rem 1rem;
+        position: relative;
+        z-index: 10;
       }
 
       .card {
-        background-color: white;
+        background-color: rgba(255, 255, 255, 0.9);
         border-radius: 16px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
         padding: 3rem;
@@ -150,12 +141,55 @@
       .hidden {
         display: none;
       }
+
+      .ocean {
+        height: 5%;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        background: #015871;
+      }
+
+      .wave {
+        background: url(https://s3-us-west-2.amazonaws.com/s.cdpn.io/85486/wave.svg) repeat-x;
+        position: absolute;
+        bottom: -10px;
+        width: 6400px;
+        height: 198px;
+        animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+        transform: translate3d(0, 0, 0);
+      }
+
+      .wave:nth-of-type(2) {
+        bottom: -25px;
+        animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -.125s infinite, swell 7s ease -1.25s infinite;
+        opacity: 1;
+      }
+
+      @keyframes wave {
+        0% {
+          margin-left: 0;
+        }
+        100% {
+          margin-left: -1600px;
+        }
+      }
+
+      @keyframes swell {
+        0%, 100% {
+          transform: translate3d(0,-25px,0);
+        }
+        50% {
+          transform: translate3d(0,5px,0);
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="card">
-        <h1 class="text-4xl font-bold heading">Speech Emotion Recognition</h1>
+        <h1 class="text-4xl font-bold heading">Speech Emotion Classifier</h1>
         <div id="upload-section">
           <form action="/upload" method="POST" enctype="multipart/form-data" id="upload-form">
             <input type="file" name="file" id="file-input" accept=".wav" class="hidden" required>
@@ -169,7 +203,10 @@
           </form>
         </div>
 
-
+        <div class="result hidden">
+          <i class="fas fa-info-circle"></i>
+          <span id="message"></span>
+        </div>
 
         <div class="audio-container hidden">
           <audio controls id="audio-player">
@@ -178,13 +215,13 @@
           </audio>
         </div>
 
-        <div class="result hidden">
-          <i class="fas fa-info-circle"></i>
-          <span id="message"></span>
-        </div>
-
         <div id="lottie-container" class="lottie-container hidden"></div>
       </div>
+    </div>
+
+    <div class="ocean">
+      <div class="wave"></div>
+      <div class="wave"></div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
