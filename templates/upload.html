@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Speech Emotion Classifier</title>
+    <title>Speech Emotion Recognition</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.16/tailwind.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -40,7 +40,7 @@
         border-radius: 16px;
         box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
         padding: 3rem;
-        min-height: 500px; /* Ensure consistent height */
+        min-height: 500px;
         display: flex;
         flex-direction: column;
       }
@@ -96,12 +96,25 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        padding: 1rem;
+        border-radius: 12px;
+        transition: background-color 0.3s ease;
       }
 
-      .result i {
-        font-size: 2rem;
+      .emotion-icon {
+        font-size: 3rem;
         margin-right: 1rem;
       }
+
+      .emotion-calm { color: #4CAF50; }
+      .emotion-happy { color: #FFC107; }
+      .emotion-fearful { color: #9C27B0; }
+      .emotion-disgust { color: #795548; }
+
+      .result-calm { background-color: rgba(76, 175, 80, 0.1); }
+      .result-happy { background-color: rgba(255, 193, 7, 0.1); }
+      .result-fearful { background-color: rgba(156, 39, 176, 0.1); }
+      .result-disgust { background-color: rgba(121, 85, 72, 0.1); }
 
       .audio-container {
         margin-top: 3rem;
@@ -142,7 +155,7 @@
   <body>
     <div class="container">
       <div class="card">
-        <h1 class="text-4xl font-bold heading">Speech Emotion Classifier</h1>
+        <h1 class="text-4xl font-bold heading">Speech Emotion Recognition</h1>
         <div id="upload-section">
           <form action="/upload" method="POST" enctype="multipart/form-data" id="upload-form">
             <input type="file" name="file" id="file-input" accept=".wav" class="hidden" required>
@@ -175,6 +188,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/js/all.min.js"></script>
     <script>
       let animation;
+
+      const emotionIcons = {
+        'calm': 'fa-smile',
+        'happy': 'fa-laugh-beam',
+        'fearful': 'fa-frown',
+        'disgust': 'fa-grimace'
+      };
 
       document.addEventListener('DOMContentLoaded', function() {
         animation = lottie.loadAnimation({
@@ -225,15 +245,20 @@
               `;
             } else {
               if (data.uploaded_file_path) {
+                const audioPlayer = document.querySelector("#audio-player");
                 document.querySelector("#audio-source").src = data.uploaded_file_path;
                 document.querySelector(".audio-container").classList.remove("hidden");
-                document.querySelector("#audio-player").load(); // Load the new source
+                audioPlayer.load(); // Load the new source
+                audioPlayer.play(); // Autoplay the audio
               }
 
               if (data.emotion) {
-                document.querySelector(".result").innerHTML = `
+                const resultElement = document.querySelector(".result");
+                resultElement.innerHTML = `
+                  <i class="fas ${emotionIcons[data.emotion] || 'fa-meh'} emotion-icon emotion-${data.emotion}"></i>
                   <span>The Predicted Emotion for the given audio is <span class="font-bold">${data.emotion}</span></span>
                 `;
+                resultElement.className = `result result-${data.emotion}`;
               }
             }
           }, 8000);
