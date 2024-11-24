@@ -6,3 +6,4 @@ data.pkl
 .vscode
 emotion_model.pkl
 Script.py
+/logs/
