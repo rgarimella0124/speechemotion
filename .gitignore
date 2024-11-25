@@ -7,3 +7,4 @@ data.pkl
 emotion_model.pkl
 Script.py
 /logs/
+/testing_data/
